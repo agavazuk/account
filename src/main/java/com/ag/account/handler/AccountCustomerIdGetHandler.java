@@ -12,10 +12,7 @@ import com.networknt.service.SingletonServiceFactory;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class AccountCustomerIdGetHandler implements LightHttpHandler {
 
@@ -42,7 +39,7 @@ public class AccountCustomerIdGetHandler implements LightHttpHandler {
         accounts.forEach(account -> {
             account.setBalance(accountService.getBalance(account));
             Collection<Transaction> transactions = transactionService.getTransactions(tr -> tr.getAccount().equals(account));
-            account.setTransactions(new ArrayList(transactions));
+            account.setTransactions(new ArrayList<Transaction>(transactions));
         });
 
         response.put("accounts", accounts);
@@ -50,5 +47,11 @@ public class AccountCustomerIdGetHandler implements LightHttpHandler {
         exchange.getResponseHeaders().add(new HttpString("Content-Type"), "application/json");
         exchange.getResponseSender().
                 send(mapper.writeValueAsString(response));
+
+        //dirty hack to break mem association
+        accounts.forEach(account -> {
+            account.setTransactions(Collections.emptyList());
+        });
+
     }
 }
