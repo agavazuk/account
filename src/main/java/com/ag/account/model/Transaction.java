@@ -1,6 +1,7 @@
 
 package com.ag.account.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
@@ -16,6 +17,7 @@ public class Transaction {
 
     private String uuid;
 
+    @JsonIgnore
     private Account account;
 
 
@@ -64,6 +66,7 @@ public class Transaction {
 
 
     @JsonProperty("account")
+    @JsonIgnore
     public Account getAccount() {
         return account;
     }
@@ -86,14 +89,12 @@ public class Transaction {
         return Objects.equals(date, Transaction.date) &&
                 Objects.equals(amount, Transaction.amount) &&
                 Objects.equals(credit, Transaction.credit) &&
-                Objects.equals(uuid, Transaction.uuid) &&
-
-                Objects.equals(account, Transaction.account);
+                Objects.equals(uuid, Transaction.uuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date, amount, credit, uuid, account);
+        return Objects.hash(date, amount, credit, uuid);
     }
 
     @Override

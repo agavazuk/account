@@ -3,10 +3,20 @@ package com.ag.account.handler;
 
 import com.networknt.exception.ApiException;
 import com.networknt.exception.ClientException;
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 public class AccountCustomerIdPostHandlerTest {
@@ -18,39 +28,83 @@ public class AccountCustomerIdPostHandlerTest {
     static final boolean enableHttps = server.getServerConfig().isEnableHttps();
     static final int httpPort = server.getServerConfig().getHttpPort();
     static final int httpsPort = server.getServerConfig().getHttpsPort();
-    static final String url = enableHttp2 || enableHttps ? "https://localhost:" + httpsPort : "http://localhost:" + httpPort;
+    static final String url = enableHttps ? "https://localhost:" + httpsPort : "http://localhost:" + httpPort;
+
 
     @Test
-    public void testAccountCustomerIdPostHandlerTest() throws ClientException, ApiException {
-        /*
-        final Http2Client client = Http2Client.getInstance();
-        final CountDownLatch latch = new CountDownLatch(1);
-        final ClientConnection connection;
-        try {
-            connection = client.connect(new URI(url), Http2Client.WORKER, Http2Client.SSL, Http2Client.BUFFER_POOL, enableHttp2 ? OptionMap.create(UndertowOptions.ENABLE_HTTP2, true): OptionMap.EMPTY).get();
-        } catch (Exception e) {
-            throw new ClientException(e);
+    public void testPostAccount() throws ClientException, ApiException, IOException {
+        URL connection = new URL(url + "/account/customerId");
+
+        HttpURLConnection con = (HttpURLConnection) connection.openConnection();
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);
+
+        DataOutputStream out = new DataOutputStream(con.getOutputStream());
+
+        out.writeBytes("{\"initialAmount\":999}");
+        out.flush();
+        out.close();
+
+        int status = con.getResponseCode();
+        Assert.assertEquals(200, status);
+
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream(), UTF_8));
+        String inputLine;
+        StringBuffer content = new StringBuffer();
+        while ((inputLine = in.readLine()) != null) {
+            content.append(inputLine);
         }
-        final AtomicReference<ClientResponse> reference = new AtomicReference<>();
-        try {
-            ClientRequest request = new ClientRequest().setPath("/account/customerId").setMethod(Methods.POST);
-            
-            request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/json");
-            request.getRequestHeaders().put(Headers.TRANSFER_ENCODING, "chunked");
-            connection.sendRequest(request, client.createClientCallback(reference, latch, "request body to be replaced"));
-            
-            latch.await();
-        } catch (Exception e) {
-            logger.error("Exception: ", e);
-            throw new ClientException(e);
-        } finally {
-            IoUtils.safeClose(connection);
-        }
-        int statusCode = reference.get().getResponseCode();
-        String body = reference.get().getAttachment(Http2Client.RESPONSE_BODY);
-        Assert.assertEquals(200, statusCode);
-        Assert.assertNotNull(body);
-        */
+        in.close();
+
+        con.disconnect();
+        Assert.assertTrue(content.indexOf("customerId") != -1);
+        Assert.assertTrue(content.indexOf("null") != -1);
+
     }
+
+
+    @Test
+    public void testPostAndGetAccount() throws ClientException, ApiException, IOException {
+        URL connection = new URL(url + "/account/customerId");
+
+        HttpURLConnection con = (HttpURLConnection) connection.openConnection();
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);
+
+        DataOutputStream out = new DataOutputStream(con.getOutputStream());
+
+        out.writeBytes("{\"initialAmount\":999}");
+        out.flush();
+        out.close();
+
+        int status = con.getResponseCode();
+        Assert.assertEquals(200, status);
+
+        con.disconnect();
+
+        con = (HttpURLConnection) connection.openConnection();
+
+        con.setRequestMethod("GET");
+        status = con.getResponseCode();
+        Assert.assertEquals(200, status);
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream(), UTF_8));
+        String inputLine;
+        StringBuffer content = new StringBuffer();
+        while ((inputLine = in.readLine()) != null) {
+            content.append(inputLine);
+        }
+        in.close();
+
+        con.disconnect();
+        Assert.assertTrue(content.indexOf("999") != -1);
+    }
+
+
+
 }
 

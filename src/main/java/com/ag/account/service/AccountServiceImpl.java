@@ -5,6 +5,7 @@ import com.ag.account.model.Customer;
 import com.ag.account.model.Transaction;
 import com.networknt.utility.Util;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Predicate;
@@ -37,12 +38,26 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account createAccount(Customer user, Transaction transaction) {
         Account account = createAccount(user);
+        if (!transaction.getAmount().equals(BigDecimal.ZERO))
+            transaction.setAccount(account);
+        transaction.setCredit(true);
         transactionService.createTransaction(transaction);
+
+        account.setBalance(transaction.getAmount());
+
         return account;
     }
 
     @Override
     public Collection<Account> getAccounts(Predicate<Account> filter) {
         return repository.stream().filter(filter).collect(Collectors.toSet());
+    }
+
+    @Override
+    public BigDecimal getBalance(Account account) {
+        return transactionService.
+                getTransactions(t -> t.getAccount().equals(account)).
+                stream().map(tr -> tr.getCredit() ? tr.getAmount() : tr.getAmount().multiply(BigDecimal.valueOf(-1))).
+                reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

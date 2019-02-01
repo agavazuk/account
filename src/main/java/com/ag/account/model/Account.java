@@ -10,9 +10,13 @@ public class Account {
 
     private String customerId;
 
-    private String uuid;
-
     private java.lang.Long createdDate;
+
+    private java.math.BigDecimal balance;
+
+    private java.util.List<Transaction> transactions;
+    
+    private String uuid;
 
 
     public Account() {
@@ -29,16 +33,6 @@ public class Account {
     }
 
 
-    @JsonProperty("uuid")
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-
     @JsonProperty("createdDate")
     public java.lang.Long getCreatedDate() {
         return createdDate;
@@ -46,6 +40,37 @@ public class Account {
 
     public void setCreatedDate(java.lang.Long createdDate) {
         this.createdDate = createdDate;
+    }
+
+
+    @JsonProperty("balance")
+    public java.math.BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(java.math.BigDecimal balance) {
+        this.balance = balance;
+    }
+
+
+    @JsonProperty("transactions")
+    public java.util.List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(java.util.List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+    
+    
+    
+    @JsonProperty("uuid")
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
 
@@ -60,14 +85,13 @@ public class Account {
         Account Account = (Account) o;
 
         return Objects.equals(customerId, Account.customerId) &&
-                Objects.equals(uuid, Account.uuid) &&
-
-                Objects.equals(createdDate, Account.createdDate);
+                Objects.equals(createdDate, Account.createdDate) &&
+                Objects.equals(uuid, Account.uuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(customerId, uuid, createdDate);
+        return Objects.hash(customerId, createdDate, uuid);
     }
 
     @Override
@@ -76,8 +100,10 @@ public class Account {
         sb.append("class Account {\n");
 
         sb.append("    customerId: ").append(toIndentedString(customerId)).append("\n");
-        sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
         sb.append("    createdDate: ").append(toIndentedString(createdDate)).append("\n");
+        sb.append("    balance: ").append(toIndentedString(balance)).append("\n");
+        sb.append("    transactions: ").append(toIndentedString(transactions)).append("\n");
+        sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
         sb.append("}");
         return sb.toString();
     }
