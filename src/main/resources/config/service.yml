@@ -1,0 +1,16 @@
+# Singleton service factory configuration/IoC injection
+singletons:
+  - com.ag.account.service.TransactionService:
+      - com.ag.account.service.TransactionServiceImpl
+  - com.ag.account.service.AccountService:
+      - com.ag.account.service.AccountServiceImpl:
+          transactionService: com.ag.account.service.TransactionService
+
+  # StartupHookProvider implementations, there are one to many and they are called in the same sequence defined.
+  # - com.networknt.server.StartupHookProvider:
+  # - com.networknt.server.Test1StartupHook
+  # - com.networknt.server.Test2StartupHook
+  # ShutdownHookProvider implementations, there are one to many and they are called in the same sequence defined.
+  # - com.networknt.server.ShutdownHookProvider:
+  # - com.networknt.server.Test1ShutdownHook
+
